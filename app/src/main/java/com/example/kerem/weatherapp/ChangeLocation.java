@@ -7,8 +7,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.example.kerem.weatherapp.MainActivity;
-import com.example.kerem.weatherapp.R;
 
 public class ChangeLocation extends AppCompatActivity {
     public static final String TEXT ="com.example.kerem.sample.TEXT";
