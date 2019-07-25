@@ -154,7 +154,8 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject main = list.getJSONObject("main");
                     JSONObject weatherdetails = list.getJSONArray("weather").getJSONObject(0);
                     JSONObject winddetails = list.getJSONObject("wind");
-                    JSONObject city1 = JSON.getJSONObject("city");
+                    JSONObject cityname = JSON.getJSONObject("city");
+                    //JSONObject coord = cityname.getJSONObject("coord");
 
                     for (int i = 0; i < 5; i++) {
                         JSONObject list5 = JSON.getJSONArray("list").getJSONObject(i*8);
@@ -179,7 +180,13 @@ public class MainActivity extends AppCompatActivity {
                     humidity.setText("Humidity\n" + main.getString("humidity"));
                     wind.setText("Wind Speed\n" + winddetails.getString("speed"));
                     details.setText(weatherdetails.getString("description"));
-                    city.setText(city1.getString("name"));
+
+                    String crd = cityname.getString("coord");
+                    if(crd!=null){
+                        city.setText("unknown");
+                    }
+                    city.setText(cityname.getString("name"));
+
 
 
                     String icon = weatherdetails.getString("icon");
