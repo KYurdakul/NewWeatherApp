@@ -183,7 +183,8 @@ public class MainActivity extends AppCompatActivity {
 
                     String crd = cityname.getString("coord");
                     if(crd!=null){
-                        city.setText("unknown");
+                        city.setText("Unknown Location");
+
                     }
                     city.setText(cityname.getString("name"));
 
