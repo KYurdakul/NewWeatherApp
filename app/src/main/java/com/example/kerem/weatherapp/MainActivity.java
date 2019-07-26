@@ -155,7 +155,6 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject weatherdetails = list.getJSONArray("weather").getJSONObject(0);
                     JSONObject winddetails = list.getJSONObject("wind");
                     JSONObject cityname = JSON.getJSONObject("city");
-                    //JSONObject coord = cityname.getJSONObject("coord");
 
                     for (int i = 0; i < 5; i++) {
                         JSONObject list5 = JSON.getJSONArray("list").getJSONObject(i*8);
