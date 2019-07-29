@@ -1,14 +1,17 @@
 package com.example.kerem.weatherapp;
 
 
-import android.content.Intent;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,8 +23,13 @@ import java.util.Calendar;
 import java.util.Date;
 
 
-public class MainActivity extends AppCompatActivity {
-    TextView city;
+public class MainActivity extends AppCompatActivity implements LocationListener{
+
+    LocationManager locationManager;
+
+    static double lat, lng;
+
+    TextView location;
     TextView weather;
     TextView pressure;
     TextView humidity;
@@ -30,35 +38,32 @@ public class MainActivity extends AppCompatActivity {
 
     SwipeRefreshLayout swipe;
 
-
     String show;
 
 
-    int[] text ={R.id.text1,
+    int[] text = {R.id.text1,
             R.id.text2,
             R.id.text3,
             R.id.text4,
             R.id.text5};
 
-    int[] image ={R.id.image1,
+    int[] image = {R.id.image1,
             R.id.image2,
             R.id.image3,
             R.id.image4,
             R.id.image5,};
 
-    int[] detail ={R.id.detail1,
+    int[] detail = {R.id.detail1,
             R.id.detail2,
             R.id.detail3,
             R.id.detail4,
             R.id.detail5};
 
-    int[] day ={R.id.day1,
+    int[] day = {R.id.day1,
             R.id.day2,
             R.id.day3,
             R.id.day4,
             R.id.day5};
-
-
 
 
     @Override
@@ -66,15 +71,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        city = (TextView)findViewById(R.id.city);
-        weather = (TextView)findViewById(R.id.weather);
-        pressure = (TextView)findViewById(R.id.pressure);
-        humidity = (TextView)findViewById(R.id.humidity);
-        wind = (TextView)findViewById(R.id.wind);
-        details = (TextView)findViewById(R.id.details);
-        swipe = (SwipeRefreshLayout)findViewById(R.id.Swipe);
+        location = (TextView)findViewById(R.id.location);
+        weather = (TextView) findViewById(R.id.weather);
+        pressure = (TextView) findViewById(R.id.pressure);
+        humidity = (TextView) findViewById(R.id.humidity);
+        wind = (TextView) findViewById(R.id.wind);
+        details = (TextView) findViewById(R.id.details);
+        swipe = (SwipeRefreshLayout) findViewById(R.id.Swipe);
 
 
+        getLocation();
         swipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -83,31 +89,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
         taskLoadUp(show);
-    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.options,menu);
-        return true;
-    }
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}, 101);
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item){
-        switch(item.getItemId()){
-            case R.id.item1:
-                Intent intent = new Intent(this,ChangeLocation.class);
-                this.startActivity(intent);
-                break;
-            default:
-                return super.onOptionsItemSelected(item);
         }
 
-        return true;
     }
+
+
 
     public void taskLoadUp(String query) {
         if(com.example.kerem.weatherapp.Network.Internet(getApplicationContext())){
@@ -120,17 +111,51 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+    void getLocation() {
+        try {
+            locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 5, this);
+        }
+        catch(SecurityException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        lat = location.getLatitude();
+        lng = location.getLongitude();
+
+        new Download().execute(String.valueOf(lat),String.valueOf(lng));
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
+
+
 
     class Download extends AsyncTask<String, Void, String> {
 
         @Override
         protected String doInBackground(String... args) {
-            Intent intent = getIntent();
-            double lat = intent.getDoubleExtra(ChangeLocation.TEXT,41.0138);
-            double lon = intent.getDoubleExtra(ChangeLocation.TEXT1,28.9497);
-            String url1 = com.example.kerem.weatherapp.Network.getData("http://api.openweathermap.org/data/2.5/forecast?lat="+lat+"&lon="+lon+"&lang=tr&units=metric&appid=6a834403759e6591a33df3ebb9285b18");
+
+            String url1 = com.example.kerem.weatherapp.Network.getData("http://api.openweathermap.org/data/2.5/forecast?lat="+lat+"&lon="+lng+"&lang=tr&units=metric&appid=6a834403759e6591a33df3ebb9285b18");
             return url1;
         }
+
+
 
         @Override
         protected void onPostExecute(String url) {
@@ -156,6 +181,7 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject winddetails = list.getJSONObject("wind");
                     JSONObject cityname = JSON.getJSONObject("city");
 
+
                     for (int i = 0; i < 5; i++) {
                         JSONObject list5 = JSON.getJSONArray("list").getJSONObject(i*8);
                         JSONObject main5 = list5.getJSONObject("main");
@@ -180,12 +206,7 @@ public class MainActivity extends AppCompatActivity {
                     wind.setText("Wind Speed\n" + winddetails.getString("speed"));
                     details.setText(weatherdetails.getString("description"));
 
-                    String crd = cityname.getString("coord");
-                    if(crd!=null){
-                        city.setText("Unknown Location");
-
-                    }
-                    city.setText(cityname.getString("name"));
+                    location.setText(cityname.getString("name"));
 
 
 
@@ -198,6 +219,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
 
 
 }
