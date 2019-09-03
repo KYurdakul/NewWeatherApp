@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
 
 
 
-    void getLocation() {
+    public void getLocation() {
         try {
             locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 5, this);
@@ -145,13 +145,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     }
 
 
-
     class Download extends AsyncTask<String, Void, String> {
 
         @Override
         protected String doInBackground(String... args) {
-
-            String url1 = com.example.kerem.weatherapp.Network.getData("http://api.openweathermap.org/data/2.5/forecast?lat="+lat+"&lon="+lng+"&lang=tr&units=metric&appid=6a834403759e6591a33df3ebb9285b18");
+            String API_KEY = "OPENWEATHER API KEY";
+            String url1 = com.example.kerem.weatherapp.Network.getData("http://api.openweathermap.org/data/2.5/forecast?lat="+lat+"&lon="+lng+"&lang=tr&units=metric&appid="+API_KEY);
             return url1;
         }
 

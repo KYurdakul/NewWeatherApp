@@ -23,7 +23,7 @@ public class Network {
 
     public static String getData(String src) {
         URL url;
-        HttpURLConnection connection = null;
+        HttpURLConnection connection;
         try {
             url = new URL(src);
             connection = (HttpURLConnection) url.openConnection();
